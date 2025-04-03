@@ -6,7 +6,7 @@ interface InternetReqProps {
 }
 
 const InternetReq: React.FC<InternetReqProps> = ({ children }) => {
-  const [connection, setConnection] = useState<boolean>(false);
+  const [connection, _setConnection] = useState<boolean>(false);
 
   useEffect(() => {
     //TODO: check for internet connectivity

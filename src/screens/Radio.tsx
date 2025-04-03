@@ -11,7 +11,7 @@ const Radio = () => {
         <div className="mb-4">
           <AudioSource top="PLAYING FROM RADIO" bottom="98.5 FM" />
         </div>
-        <SongInfo title="Dogs - Pink Floyd" artist="Yle Vega" col={12} />
+        <SongInfo col={12} />
         <div className="mt-3">
           <StationControls />
         </div>

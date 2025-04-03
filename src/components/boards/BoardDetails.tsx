@@ -12,7 +12,7 @@ const BoardDetails = () => {
   }
 
   const [boardOutput, setBoardOutput] = useState<BoardOutput[]>([]);
-  const [baudRate, setBaudRate] = useState<number>(9600);
+  const [_baudRate, setBaudRate] = useState<number>(9600);
 
   useEffect(() => {
     setBoardOutput([{ timestamp: "21:00:00", output: "Test" }, { timestamp: "", output: "Test" }, { timestamp: "", output: "Test", }]);

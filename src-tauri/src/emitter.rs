@@ -1,6 +1,10 @@
 use std::fmt::Debug;
 
-use crate::{bluetooth::BtDevice, music::SongInfo, notifications::NotificationPayload};
+use crate::{
+    bluetooth::{BtDevice, BtState},
+    music::SongInfo,
+    notifications::NotificationPayload,
+};
 use serde::Serialize;
 use tauri::Emitter;
 use tracing::info;
@@ -45,6 +49,7 @@ impl CustomEmitter {
 
     pub fn emit_bluetooth_connected(payload: NotificationPayload, app: &tauri::AppHandle) {
         Self::emit_event(app, "bt-device-connected", payload);
+        Self::emit_bluetooth_state(&BtState::Connected, app);
     }
 
     pub fn emit_bluetooth_disconnected(payload: NotificationPayload, app: &tauri::AppHandle) {
@@ -56,7 +61,15 @@ impl CustomEmitter {
     }
 
     pub fn emit_bluetooth_discovery(payload: String, app: &tauri::AppHandle) {
-        Self::emit_event(app, "bt-discovering", payload);
+        Self::emit_event(app, "bt-discovering", &payload);
+        match payload.as_str() {
+            "true" => Self::emit_bluetooth_state(&BtState::Searching, app),
+            _ => Self::emit_bluetooth_state(&BtState::On, app),
+        }
+    }
+
+    pub fn emit_bluetooth_state(payload: &BtState, app: &tauri::AppHandle) {
+        Self::emit_event(app, "bt-state", payload);
     }
 
     // Utils

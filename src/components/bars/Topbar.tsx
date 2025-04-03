@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BtState, WifiState } from "../../Constants";
 import Clock from "../generic/Clock";
 import Icon from "../../utils/svgUtils";
 import { useLocation } from "react-router-dom";
 import { parsePathname } from "../../utils/utils";
+import { listen } from "@tauri-apps/api/event";
 
 const Topbar = () => {
   const [wifiState, setWifiState] = useState<WifiState>(WifiState.On);
   const [btState, setBtState] = useState<BtState>(BtState.On);
+
+  useEffect(() => {
+    const promiseBtState = listen<BtState>('bt-state', (e) => setBtState(e.payload));
+    const promiseWifiState = listen<WifiState>('wifi-state', (e) => setWifiState(e.payload));
+
+    return () => {
+      promiseBtState.then(unlisten => { console.log("Unlistening bt state"); unlisten(); });
+      promiseWifiState.then(unlisten => { console.log("Unlistening wifi state"); unlisten(); });
+    }
+  }, []);
 
   const location = useLocation();
 

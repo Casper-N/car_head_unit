@@ -2,7 +2,6 @@ use std::time::Duration;
 
 use playerctl_wrapper::{metadata::Metadata, player::Player as PlayerCtl, playerctld::Properties};
 use tokio::{sync::watch, time::sleep};
-use tracing::debug;
 
 use crate::emitter::CustomEmitter;
 

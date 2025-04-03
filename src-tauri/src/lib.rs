@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use bluetooth::bluetooth::{
     connect_to_device, device_listener, disconnect_from_device, get_discovery_status,
