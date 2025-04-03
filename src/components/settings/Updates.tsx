@@ -18,7 +18,7 @@ const Updates = () => {
           <h3><span>Check for updates</span></h3>
           <span className="fs-6"></span>
         </div>
-        <button className="d-flex align-items-center justify-content-center col-1 btn btn-secondary rounded btn-lg"><Icon name="restart" size={"100%"} /></button>
+        <button className="d-flex align-items-center justify-content-center col-1 btn btn-secondary rounded btn-lg" onClick={checkUpdates}><Icon name="restart" size={"100%"} /></button>
       </div>
 
       <div className="row bg-primary p-2 rounded align-items-center">

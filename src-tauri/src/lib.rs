@@ -13,11 +13,13 @@ use music::music::{
 use tauri::Manager;
 use tokio::sync::{watch, Mutex};
 use tracing::info;
+use updater::check_for_updates;
 
 pub mod bluetooth;
 mod emitter;
 mod music;
 mod notifications;
+mod updater;
 
 pub struct AppState {
     music_position_sender: Mutex<Option<watch::Sender<bool>>>,
@@ -86,6 +88,10 @@ pub fn run() {
             let app = handle.clone();
             tauri::async_runtime::spawn(async move {
                 start_music_listener(app).await;
+            });
+            let app = handle.clone();
+            tauri::async_runtime::spawn(async move {
+                let _ = check_for_updates(&app).await;
             });
             let app = handle.clone();
             start_bt_listener(app);
