@@ -1,0 +1,36 @@
+[package]
+name = "car_head_unit_rs"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "car_head_unit_rs_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+bt_wrapper = { git = "https://github.com/capppe/bluez_wrapper_rs.git" }
+serial_rs = { git = "https://github.com/capppe/serial_rs.git" }
+playerctl_wrapper = { git = "https://github.com/capppe/playerctl_wrapper_rs.git" }
+radio_browser = { git = "https://github.com/capppe/radio_browser.git" }
+tokio = "1.44.0"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+regex = "1.11.1"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios", target_os = "windows")))'.dependencies]
+tauri-plugin-updater = "2"

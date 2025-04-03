@@ -1,0 +1,11 @@
+.flip {
+  transform: rotate(180deg);
+}
+
+.custom-overflow-h {
+  height: calc(100vh - 210px);
+}
+
+.hover-opacity:hover {
+  opacity: 0.7;
+}
