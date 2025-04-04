@@ -4,5 +4,5 @@
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    car_head_unit_lib::run()
+    car_head_unit::run()
 }
