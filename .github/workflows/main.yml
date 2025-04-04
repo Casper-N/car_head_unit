@@ -71,7 +71,8 @@ jobs:
           elif [ -d "${{ github.workspace }}/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/" ]; then
             echo "path=${{ github.workspace }}/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/car-head-unit_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb" >> $GITHUB_OUTPUT
           else
-            echo "path=$(find ${{ github.workspace }}/src-tauri/target -type f -name 'car-head-unit*.deb' -print -quit)"
+            fallback_path=$(find ${{ github.workspace }}/src-tauri/target -type f -name 'car-head-unit*.deb' -print -quit)
+            echo "path=$fallback_path" >> $GITHUB_OUTPUT
           fi
       # TODO: Combine this with the basic workflow and upload the files to the Release.
       - name: Upload deb bundle
