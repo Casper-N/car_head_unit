@@ -18,7 +18,6 @@ jobs:
             cpu: cortex-a72
             base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
             deb: arm64
-            rpm: aarch64
             appimage: aarch64
 
     steps:
@@ -55,40 +54,25 @@ jobs:
             curl -fsSL https://deb.nodesource.com/setup_lts.x | bash
             apt-get install -y nodejs
 
+            # Get the signing key
+            mkdir -p /root/.tauri/
+            echo "${{ secrets.DEB_SIGNING_KEY }}" > /root/.tauri/chu_rs.key
+            export TAURI_SIGNING_PRIVATE_KEY="/root/.tauri/chu_rs.key"
+            export TAURI_PRIVATE_KEY_PATH="/root/.tauri/chu_rs.key"
+            head -c -200 /root/.tauri/chu_rs.key
+
             # Install frontend dependencies
             npm install
 
             # Build the application
-            npm run tauri build -- --verbose
+            npm run tauri build -- --verbose --bundles deb
 
       - name: Get app version
         run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
-      - name: Determine file path
-        id: set-path
-        run: |
-          if [ -d "${{ github.workspace }}/src-tauri/target/release/bundle/deb/" ]; then
-            echo "path=${{ github.workspace }}/src-tauri/target/release/bundle/deb/car-head-unit_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb" >> $GITHUB_OUTPUT
-          elif [ -d "${{ github.workspace }}/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/" ]; then
-            echo "path=${{ github.workspace }}/src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/car-head-unit_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb" >> $GITHUB_OUTPUT
-          else
-            fallback_path=$(find ${{ github.workspace }}/src-tauri/target -type f -name 'car-head-unit*.deb' -print -quit)
-            echo "path=$fallback_path" >> $GITHUB_OUTPUT
-          fi
+
       # TODO: Combine this with the basic workflow and upload the files to the Release.
       - name: Upload deb bundle
         uses: actions/upload-artifact@v4
         with:
-          name: Debian Bundle
-          path: ${{ steps.set-path.outputs.path }}
-
-      - name: Upload appimage bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: AppImage Bundle
-          path: ${{ github.workspace }}/src-tauri/target/release/bundle/appimage/car-head-unit_${{ env.APP_VERSION }}_${{ matrix.appimage }}.AppImage
-
-      - name: Upload appimage bundle TEST
-        uses: actions/upload-artifact@v4
-        with:
-          name: AppImage Bundle
-          path: ${{ github.workspace }}/src-tauri/aarch64-unknown-linux-gnu/release/bundle/appimage/car-head-unit_${{ env.APP_VERSION }}_${{ matrix.appimage }}.AppImage
+          name: Deb Bundle
+          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.appimage }}.AppImage
