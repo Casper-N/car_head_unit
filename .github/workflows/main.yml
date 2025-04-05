@@ -56,7 +56,8 @@ jobs:
 
             # Get the signing key
             mkdir -p /root/.tauri/
-            echo "${{ secrets.DEB_SIGNING_KEY }}" > /root/.tauri/chu_rs.key
+            # echo "${{ secrets.DEB_SIGNING_KEY }}" > /root/.tauri/chu_rs.key
+            echo "${{ secrets.DEB_SIGNING_KEY }}" | tr -d '\n' | base64 -d > /root/.tauri/chu_rs.key
             export TAURI_SIGNING_PRIVATE_KEY="/root/.tauri/chu_rs.key"
             export TAURI_PRIVATE_KEY_PATH="/root/.tauri/chu_rs.key"
             head -c -200 /root/.tauri/chu_rs.key
