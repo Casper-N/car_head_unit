@@ -57,10 +57,10 @@ jobs:
             # Get the signing key
             mkdir -p /root/.tauri/
             # echo "${{ secrets.DEB_SIGNING_KEY }}" > /root/.tauri/chu_rs.key
-            echo "${{ secrets.DEB_SIGNING_KEY }}" | tr -d '\n' > /root/.tauri/chu_rs.key
+            echo "${{ secrets.DEB_SIGNING_KEY }}" > /root/.tauri/chu_rs.key
             export TAURI_SIGNING_PRIVATE_KEY="/root/.tauri/chu_rs.key"
-            export TAURI_SIGNING_PUBLIC_KEY="dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg2RUVGOUIwNUM3QkIzMQpSV1F4dThjRm0rOXVDRVVmcFBFczNOM0h3bmZGeGJNbVBCaXdFWTJnL00ycERLM0VuRjhnOXlkOQo="
-            export TAURI_SIGNING_PRIVATE_KEY_PASSWORD=""
+            export TAURI_SIGNING_PUBLIC_KEY="dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCNDUyNzRDMDhEMjFDNDAKUldSQUhOSUlUQ2RGTzlWb1NFRUs0amMyUEtGUWNKanZtSWNUZi96Y3BJNXJxMUxvZnRlMHRFcGoK"
+            export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="test"
 
             # Install frontend dependencies
             npm install
