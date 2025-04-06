@@ -17,8 +17,7 @@ jobs:
           - arch: aarch64
             cpu: cortex-a72
             base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
-            deb: arm64
-            appimage: aarch64
+            deb: aarch64
 
     steps:
       - uses: actions/checkout@v3
@@ -77,4 +76,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Deb Bundle
-          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.appimage }}.AppImage
+          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.appimage }}.deb
