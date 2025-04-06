@@ -17,7 +17,7 @@ jobs:
           - arch: aarch64
             cpu: cortex-a72
             base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
-            deb: aarch64
+            deb: arm64
 
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
 
       - name: Build app
         env: 
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.DEB_SIGNING_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         uses: pguyot/arm-runner-action@v2.6.5
         with:
           base_image: ${{ matrix.base_image }}
@@ -76,4 +76,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Deb Bundle
-          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.appimage }}.deb
+          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
+      - name: Upload deb bundle test
+        uses: actions/upload-artifact@v4
+        with:
+          name: Deb Bundle test
+          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_arm64.deb
