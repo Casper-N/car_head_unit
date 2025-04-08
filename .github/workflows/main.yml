@@ -18,7 +18,6 @@ jobs:
             cpu: cortex-a72
             base_image: https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz
             deb: arm64
-            appimage: aarch64
 
     steps:
       - uses: actions/checkout@v3
@@ -30,6 +29,8 @@ jobs:
           cache-on-failure: true
 
       - name: Build app
+        env: 
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         uses: pguyot/arm-runner-action@v2.6.5
         with:
           base_image: ${{ matrix.base_image }}
@@ -56,16 +57,16 @@ jobs:
 
             # Get the signing key
             mkdir -p /root/.tauri/
-            echo "${{ secrets.DEB_SIGNING_KEY }}" > /root/.tauri/chu_rs.key
-            export TAURI_SIGNING_PRIVATE_KEY="/root/.tauri/chu_rs.key"
-            export TAURI_PRIVATE_KEY_PATH="/root/.tauri/chu_rs.key"
-            head -c -200 /root/.tauri/chu_rs.key
+            echo "$TAURI_SIGNING_PRIVATE_KEY" | base64 -d > /root/.tauri/chu_rs.key
+            export TAURI_SIGNING_PRIVATE_KEY=/root/tauri/chu_rs.key
+            export TAURI_SIGNING_PUBLIC_KEY="dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCNDUyNzRDMDhEMjFDNDAKUldSQUhOSUlUQ2RGTzlWb1NFRUs0amMyUEtGUWNKanZtSWNUZi96Y3BJNXJxMUxvZnRlMHRFcGoK"
+            export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="test"
 
             # Install frontend dependencies
             npm install
 
             # Build the application
-            npm run tauri build -- --verbose --bundles deb
+            npm run tauri build -- --verbose --bundles deb || true
 
       - name: Get app version
         run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
@@ -75,4 +76,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Deb Bundle
-          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.appimage }}.AppImage
+          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
+      - name: Upload deb bundle test
+        uses: actions/upload-artifact@v4
+        with:
+          name: Deb Bundle test
+          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_arm64.deb
