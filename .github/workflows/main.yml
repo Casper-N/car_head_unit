@@ -63,7 +63,7 @@ jobs:
       - name: Zip deb file
         run: |
           cd src-tauri/target/release/bundle/deb
-          zip deb.zip car_head_unit_rs${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
+          zip deb.zip car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
           mv deb.zip $GITHUB_WORKSPACE
 
       - name: Create latest.json
