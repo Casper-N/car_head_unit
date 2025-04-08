@@ -1,5 +1,7 @@
 use serde::Serialize;
 
+use crate::updater::UpdateInfo;
+
 #[derive(Debug, Clone, Serialize)]
 pub enum NotificationLevel {
     Normal,
@@ -127,11 +129,35 @@ impl NotificationPayload {
     }
 
     // Updates
-    pub fn update_available() -> Self {
+    pub fn update_available(update_info: &UpdateInfo) -> Self {
         Self::success(
             "Update is available",
             "An update is available. Go to Settings > Updates to update",
+            Some(update_info.to_string()),
+        )
+    }
+
+    pub fn update_download_done() -> Self {
+        Self::success(
+            "Download done",
+            "The download was successful. Starting installation...",
             None,
+        )
+    }
+
+    pub fn no_update_available() -> Self {
+        Self::normal(
+            "No update is available",
+            "You are already using the latest version. Great!",
+            None,
+        )
+    }
+
+    pub fn fetch_latest_error() -> Self {
+        Self::danger(
+            "Failed to fetch updates", 
+            "An error occurred while trying to fetch the latest update. Are you connected to the internet?", 
+            None
         )
     }
 }

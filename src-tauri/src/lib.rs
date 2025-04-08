@@ -13,7 +13,7 @@ use music::music::{
 use tauri::Manager;
 use tokio::sync::{watch, Mutex};
 use tracing::info;
-use updater::check_for_updates;
+use updater::{check_for_updates, update_application};
 
 pub mod bluetooth;
 mod emitter;
@@ -80,18 +80,12 @@ impl AppState {
 pub fn run() {
     tauri::Builder::default()
         .manage(AppState::new())
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let handle = app.handle();
 
             let app = handle.clone();
             tauri::async_runtime::spawn(async move {
                 start_music_listener(app).await;
-            });
-            let app = handle.clone();
-            tauri::async_runtime::spawn(async move {
-                let _ = check_for_updates(&app).await;
             });
             let app = handle.clone();
             start_bt_listener(app);
@@ -117,6 +111,8 @@ pub fn run() {
             turn_on_bluetooth,
             get_known_devices,
             get_discovery_status,
+            check_for_updates,
+            update_application,
             turn_off_bluetooth
         ])
         .run(tauri::generate_context!())

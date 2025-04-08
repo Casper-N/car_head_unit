@@ -25,7 +25,9 @@ pub async fn start_music_listener(app: tauri::AppHandle) {
 
         while let Some(response) = receiver.recv().await {
             if response.contains_key("Metadata") {
-                Emitter::emit_song_change(player.get_song_info(), &app);
+                if let Some(song_info) = player.get_song_info() {
+                    Emitter::emit_song_change(song_info, &app);
+                }
                 Emitter::emit_song_position(player.get_song_position(), &app);
             }
             if response.contains_key("PlaybackStatus") {
@@ -40,7 +42,9 @@ pub fn emit_music_status(app: tauri::AppHandle) {
     let player = Player::new().unwrap_or_else(|e| panic!("Failed to create a player: {}", e));
 
     Emitter::emit_song_position(player.get_song_position(), &app);
-    Emitter::emit_song_change(player.get_song_info(), &app);
+    if let Some(song_info) = player.get_song_info() {
+        Emitter::emit_song_change(song_info, &app);
+    }
     Emitter::emit_music_is_playing(player.get_playback_status(), &app);
 }
 

@@ -25,8 +25,25 @@ impl CustomEmitter {
         Self::emit_event(app, &event_name, payload);
     }
 
+    // Updates
     pub fn emit_update_available(payload: NotificationPayload, app: &tauri::AppHandle) {
         Self::emit_event(app, "update-available", payload);
+    }
+
+    pub fn emit_update_url(payload: &String, app: &tauri::AppHandle) {
+        Self::emit_event(app, "update-url", payload);
+    }
+
+    pub fn emit_update_download_progress(payload: f64, app: &tauri::AppHandle) {
+        Self::emit_event(app, "update-download-progress", payload);
+    }
+
+    pub fn emit_update_step_done(app: &tauri::AppHandle, step: usize) {
+        Self::emit_event(app, "update-step-done", step);
+    }
+
+    pub fn emit_update_step_fail(app: &tauri::AppHandle, step: usize) {
+        Self::emit_event(app, "update-step-fail", step);
     }
 
     // Music events

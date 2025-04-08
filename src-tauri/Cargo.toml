@@ -19,7 +19,6 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
-tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
@@ -27,10 +26,11 @@ bt_wrapper = { git = "https://github.com/capppe/bluez_wrapper_rs.git" }
 serial_rs = { git = "https://github.com/capppe/serial_rs.git" }
 playerctl_wrapper = { git = "https://github.com/capppe/playerctl_wrapper_rs.git" }
 radio_browser = { git = "https://github.com/capppe/radio_browser.git" }
-tokio = "1.44.0"
+tokio = { version = "1.44.0", features = ["rt-multi-thread", "macros"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 regex = "1.11.1"
-
-[target.'cfg(not(any(target_os = "android", target_os = "ios", target_os = "windows")))'.dependencies]
-tauri-plugin-updater = "2"
+openssl = { version = "0.10.72", features = ["vendored"] }
+reqwest = { version = "0.12.15", features = ["json", "stream"] }
+futures-util = "0.3.31"
+zip = "2.6.1"

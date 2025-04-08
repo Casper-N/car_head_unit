@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use playerctl_wrapper::{metadata::Metadata, player::Player as PlayerCtl, playerctld::Properties};
 use tokio::{sync::watch, time::sleep};
+use tracing::error;
 
 use crate::emitter::CustomEmitter;
 
@@ -25,25 +26,32 @@ impl Player {
             .unwrap_or("Stopped".to_string());
     }
 
-    pub fn get_song_info(&self) -> SongInfo {
-        let metadata_prop = self.player.get_property("Metadata").unwrap();
+    pub fn get_song_info(&self) -> Option<SongInfo> {
+        let metadata_prop = match self.player.get_property("Metadata") {
+            Ok(prop) => prop,
+            Err(e) => {
+                error!("Could not get metadata, {}", e);
+                return None;
+            }
+        };
 
         let metadata = Metadata::from(&metadata_prop);
 
-        return SongInfo::from_metadata(metadata);
+        return Some(SongInfo::from_metadata(metadata));
     }
 
     pub fn get_song_position(&self) -> i64 {
-        let position = self.player.get_property::<i64>("Position").unwrap();
+        let position = self.player.get_property::<i64>("Position").unwrap_or(0);
         return position / 1000000;
     }
 
     pub async fn get_song_progress(app: tauri::AppHandle, receiver: watch::Receiver<bool>) {
         let player = Player::new().unwrap();
         while *receiver.borrow() {
-            let position = player.player.get_property::<i64>("Position").unwrap();
-            CustomEmitter::emit_song_position(position / 1000000, &app);
-            sleep(Duration::from_millis(1000)).await;
+            if let Ok(position) = player.player.get_property::<i64>("Position") {
+                CustomEmitter::emit_song_position(position / 1000000, &app);
+                sleep(Duration::from_millis(1000)).await;
+            }
         }
     }
 

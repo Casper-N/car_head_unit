@@ -3,7 +3,5 @@
   "platforms": [
     "linux"
   ],
-  "permissions": [
-    "updater:default"
-  ]
+  "permissions": []
 }

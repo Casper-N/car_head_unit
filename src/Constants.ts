@@ -18,6 +18,12 @@ export enum NotificationLevel {
   Danger = "alert-danger",
 }
 
+export type UpdateInfo = {
+  version: string;
+  url: string;
+  change_log: string;
+}
+
 export type SongInfoType = {
   title: string;
   artist: string;
