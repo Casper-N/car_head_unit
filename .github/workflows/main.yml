@@ -29,8 +29,6 @@ jobs:
           cache-on-failure: true
 
       - name: Build app
-        env: 
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         uses: pguyot/arm-runner-action@v2.6.5
         with:
           base_image: ${{ matrix.base_image }}
@@ -38,15 +36,10 @@ jobs:
           bind_mount_repository: true
           image_additional_mb: 10240
           optimize_image: no
-          #exit_on_fail: no
           commands: |
-            # Prevent Rust from complaining about $HOME not matching eid home
             export HOME=/root
-
-            # Workaround to CI worker being stuck on Updating crates.io index
             export CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 
-            # Install setup prerequisites
             apt-get update -y --allow-releaseinfo-change
             apt-get autoremove -y
             apt-get install -y --no-install-recommends --no-install-suggests curl libwebkit2gtk-4.1-dev build-essential libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2 file
@@ -55,30 +48,60 @@ jobs:
             curl -fsSL https://deb.nodesource.com/setup_lts.x | bash
             apt-get install -y nodejs
 
-            # Get the signing key
-            mkdir -p /root/.tauri/
-            echo "$TAURI_SIGNING_PRIVATE_KEY" | base64 -d > /root/.tauri/chu_rs.key
-            export TAURI_SIGNING_PRIVATE_KEY=/root/tauri/chu_rs.key
-            export TAURI_SIGNING_PUBLIC_KEY="dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDNCNDUyNzRDMDhEMjFDNDAKUldSQUhOSUlUQ2RGTzlWb1NFRUs0amMyUEtGUWNKanZtSWNUZi96Y3BJNXJxMUxvZnRlMHRFcGoK"
-            export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="test"
-
-            # Install frontend dependencies
             npm install
-
-            # Build the application
             npm run tauri build -- --verbose --bundles deb || true
 
       - name: Get app version
         run: echo "APP_VERSION=$(jq -r .version src-tauri/tauri.conf.json)" >> $GITHUB_ENV
 
-      # TODO: Combine this with the basic workflow and upload the files to the Release.
-      - name: Upload deb bundle
+      - name: Upload deb bundle as artifact
         uses: actions/upload-artifact@v4
         with:
           name: Deb Bundle
           path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
-      - name: Upload deb bundle test
-        uses: actions/upload-artifact@v4
+      
+      - name: Zip deb file
+        run: |
+          cd src-tauri/target/release/bundle/deb
+          zip deb.zip car_head_unit_rs${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
+          mv deb.zip $GITHUB_WORKSPACE
+
+      - name: Create latest.json
+        run: |
+          echo '{
+            "version": "'${{ env.APP_VERSION }}'",
+            "url": "https://github.com/Casper-N/car_head_unit/releases/latest/download/deb.zip",
+            "change_log": "Test"
+          }' > $GITHUB_WORKSPACE/latest.json
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: Deb Bundle test
-          path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_arm64.deb
+          tag_name: v${{ env.APP_VERSION }}
+          release_name: v${{ env.APP_VERSION }}
+          draft: false
+          prerelease: false
+      
+      - name: Upload deb.zip to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/deb.zip
+          asset_name: deb.zip
+          asset_content_type: application/zip
+
+      - name: Upload latest.json to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/latest.json
+          asset_name: latest.json
+          asset_content_type: application/json
+
