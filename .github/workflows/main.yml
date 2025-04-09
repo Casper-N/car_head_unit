@@ -60,11 +60,10 @@ jobs:
           name: Deb Bundle
           path: ${{ github.workspace }}/src-tauri/target/release/bundle/deb/car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb
       
-      - name: Zip deb file
+      - name: Copy deb file
         run: |
           cd src-tauri/target/release/bundle/deb
-          mv car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb deb.deb
-          mv deb.deb $GITHUB_WORKSPACE
+          cp car_head_unit_rs_${{ env.APP_VERSION }}_${{ matrix.deb }}.deb $GITHUB_WORKSPACE/chu.deb
 
       - name: Create latest.json
         run: |
@@ -85,14 +84,14 @@ jobs:
           draft: false
           prerelease: false
       
-      - name: Upload deb.zip to release
+      - name: Upload chu.deb to release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/deb.deb
-          asset_name: deb.deb
+          asset_path: ${{ github.workspace }}/chu.deb
+          asset_name: chu.deb
           asset_content_type: application/zip
 
       - name: Upload latest.json to release
