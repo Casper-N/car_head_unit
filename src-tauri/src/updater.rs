@@ -1,14 +1,14 @@
 use futures_util::StreamExt;
-use reqwest::Response;
 use std::{fmt::Display, io::Write, path::Path, process::Command};
 use zip::ZipArchive;
 
 use serde::{Deserialize, Serialize};
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use crate::{emitter::CustomEmitter as Emitter, notifications::NotificationPayload};
 
 const URL: &str = "https://github.com/casper-n/car_head_unit/releases/latest/download/latest.json";
+const UPDATE_FILE_NAME: &str = "car_head_unit_update.deb";
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UpdateInfo {
@@ -54,31 +54,31 @@ pub async fn update_application(
     app: tauri::AppHandle,
 ) -> Result<(), String> {
     debug!("Starting download of update from url {}", url);
-    let zip_path = match download_file(url, save_path, &app).await {
+    let _file_path = match download_file(url, save_path, &app).await {
         Ok(path) => {
             Emitter::emit_update_step_done(&app, 0);
             path
         }
         Err(e) => {
             Emitter::emit_update_step_fail(&app, 0);
-            error!("Failed to get download zip file: {}", e);
+            error!("Failed to download deb file: {}", e);
             return Err(e);
         }
     };
 
-    let deb_path = match extract_zip(&zip_path, "/home/cappe/Downloads/", &app) {
-        Ok(path) => {
-            Emitter::emit_update_step_done(&app, 1);
-            path
-        }
-        Err(e) => {
-            Emitter::emit_update_step_fail(&app, 1);
-            error!("Failed to extract zip file: {}", e);
-            return Err(e);
-        }
-    };
+    // let deb_path = match extract_zip(&zip_path, "/home/cappe/Downloads/", &app) {
+    //     Ok(path) => {
+    //         Emitter::emit_update_step_done(&app, 1);
+    //         path
+    //     }
+    //     Err(e) => {
+    //         Emitter::emit_update_step_fail(&app, 1);
+    //         error!("Failed to extract zip file: {}", e);
+    //         return Err(e);
+    //     }
+    // };
 
-    match install_deb(&deb_path, &app) {
+    match install_deb(&_file_path, &app) {
         Ok(()) => {
             Emitter::emit_update_step_done(&app, 2);
             Ok(())
@@ -105,11 +105,9 @@ async fn download_file(
         }
     };
 
-    let total_size = resp
-        .content_length()
-        .ok_or("Failed to get content length")?;
+    let total_size = resp.content_length().unwrap_or(0);
 
-    let save_path = format!("{}/car_head_unit_update.zip", &save_path);
+    let save_path = format!("{}/{}", &save_path, UPDATE_FILE_NAME);
     let path = Path::new(&save_path);
     let mut file = match std::fs::File::create(path) {
         Ok(f) => f,
@@ -182,6 +180,7 @@ fn extract_zip(zip_path: &str, extract_to: &str, app: &tauri::AppHandle) -> Resu
 }
 
 fn install_deb(deb_path: &str, app: &tauri::AppHandle) -> Result<(), String> {
+    info!("Installing deb file: {}", deb_path);
     let status = Command::new("pkexec")
         .arg("dpkg")
         .arg("-i")
